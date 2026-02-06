@@ -3,7 +3,7 @@ function login() {
   const pass = document.getElementById("pass").value;
 
   // demo credentials (later moved to Firebase)
-  if (user === "admin" && pass === "admin123") {
+  if (user === "chandrasekhar" && pass === "Sekhar277") {
     sessionStorage.setItem("loggedIn", "true");
     window.location.href = "index.html";
   } else {
