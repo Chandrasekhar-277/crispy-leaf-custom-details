@@ -1,0 +1,205 @@
+<script src="auth.js"></script>
+<script>
+  checkAuth();
+</script>
+<button onclick="logout()">Logout</button>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crispy Leaf – Customer Management</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e8f5e9;
+      padding: 20px;
+      color: #2e7d32;
+    }
+    h1 {
+      text-align: center;
+      color: #1b5e20;
+    }
+    .logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .logo span {
+      margin-left: 8px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    form {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    form input, form select {
+      padding: 10px;
+      border: 1px solid #a5d6a7;
+      border-radius: 6px;
+    }
+    form button {
+      grid-column: span 3;
+      padding: 12px;
+      background: #2e7d32;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    form button:hover {
+      background: #1b5e20;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table th, table td {
+      border: 1px solid #c8e6c9;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+    table th {
+      background: #2e7d32;
+      color: #fff;
+    }
+    .delete-btn {
+      background: #c62828;
+      color: #fff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .report {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f1f8e9;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-around;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">🌿 <span>Crispy Leaf</span></div>
+  <h1>Customer Management System</h1>
+
+  <div class="container">
+    <form id="customerForm">
+      <input type="text" id="name" placeholder="Customer Name" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="text" id="phone" placeholder="Phone" required />
+
+      <select id="type" required>
+        <option value="">Customer Type</option>
+        <option value="Retail">Retail</option>
+        <option value="Wholesale">Wholesale</option>
+      </select>
+      <input type="text" id="orders" placeholder="Product Ordered" required />
+      <input type="number" id="quantity" placeholder="Quantity" required />
+
+      <input type="text" id="address" placeholder="Delivery Address" required />
+      <button type="submit">Save Customer</button>
+    </form>
+
+    <div class="report" id="report"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="customerTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const form = document.getElementById('customerForm');
+    const table = document.getElementById('customerTable');
+    const reportDiv = document.getElementById('report');
+
+    let customers = JSON.parse(localStorage.getItem('crispyLeafCustomers')) || [];
+
+    function renderTable() {
+      table.innerHTML = '';
+      customers.forEach((c, i) => {
+        table.innerHTML += `
+          <tr>
+            <td>${c.name}</td>
+            <td>${c.type}</td>
+            <td>${c.orders}</td>
+            <td>${c.quantity}</td>
+            <td>${c.phone}</td>
+            <td>${c.address}</td>
+            <td><button class="delete-btn" onclick="deleteCustomer(${i})">Delete</button></td>
+          </tr>`;
+      });
+      updateReport();
+    }
+
+    function updateReport() {
+      const totalCustomers = customers.length;
+      const totalQuantity = customers.reduce((sum, c) => sum + Number(c.quantity), 0);
+      const retail = customers.filter(c => c.type === 'Retail').length;
+      const wholesale = customers.filter(c => c.type === 'Wholesale').length;
+
+      reportDiv.innerHTML = `
+        <div>Total Customers: ${totalCustomers}</div>
+        <div>Total Quantity Ordered: ${totalQuantity}</div>
+        <div>Retail: ${retail}</div>
+        <div>Wholesale: ${wholesale}</div>`;
+    }
+
+    function deleteCustomer(index) {
+      customers.splice(index, 1);
+      localStorage.setItem('crispyLeafCustomers', JSON.stringify(customers));
+      renderTable();
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const customer = {
+        name: name.value,
+        email: email.value,
+        phone: phone.value,
+        type: type.value,
+        orders: orders.value,
+        quantity: quantity.value,
+        address: address.value
+      };
+      customers.push(customer);
+      localStorage.setItem('crispyLeafCustomers', JSON.stringify(customers));
+      form.reset();
+      renderTable();
+    });
+
+    renderTable();
+  </script>
+
+</body>
+</html>
