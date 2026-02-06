@@ -138,68 +138,51 @@
     </table>
   </div>
 
-  <script>
-    const form = document.getElementById('customerForm');
-    const table = document.getElementById('customerTable');
-    const reportDiv = document.getElementById('report');
+  <script type="module">
+  import { saveCustomer, getCustomers, deleteCustomer } from './database.js';
 
-    let customers = JSON.parse(localStorage.getItem('crispyLeafCustomers')) || [];
+  const form = document.getElementById('customerForm');
+  const table = document.getElementById('customerTable');
 
-    function renderTable() {
-      table.innerHTML = '';
-      customers.forEach((c, i) => {
-        table.innerHTML += `
-          <tr>
-            <td>${c.name}</td>
-            <td>${c.type}</td>
-            <td>${c.orders}</td>
-            <td>${c.quantity}</td>
-            <td>${c.phone}</td>
-            <td>${c.address}</td>
-            <td><button class="delete-btn" onclick="deleteCustomer(${i})">Delete</button></td>
-          </tr>`;
-      });
-      updateReport();
-    }
-
-    function updateReport() {
-      const totalCustomers = customers.length;
-      const totalQuantity = customers.reduce((sum, c) => sum + Number(c.quantity), 0);
-      const retail = customers.filter(c => c.type === 'Retail').length;
-      const wholesale = customers.filter(c => c.type === 'Wholesale').length;
-
-      reportDiv.innerHTML = `
-        <div>Total Customers: ${totalCustomers}</div>
-        <div>Total Quantity Ordered: ${totalQuantity}</div>
-        <div>Retail: ${retail}</div>
-        <div>Wholesale: ${wholesale}</div>`;
-    }
-
-    function deleteCustomer(index) {
-      customers.splice(index, 1);
-      localStorage.setItem('crispyLeafCustomers', JSON.stringify(customers));
-      renderTable();
-    }
-
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const customer = {
-        name: name.value,
-        email: email.value,
-        phone: phone.value,
-        type: type.value,
-        orders: orders.value,
-        quantity: quantity.value,
-        address: address.value
-      };
-      customers.push(customer);
-      localStorage.setItem('crispyLeafCustomers', JSON.stringify(customers));
-      form.reset();
-      renderTable();
+  async function renderTable() {
+    table.innerHTML = '';
+    const customers = await getCustomers();
+    customers.forEach(c => {
+      table.innerHTML += `
+        <tr>
+          <td>${c.name}</td>
+          <td>${c.type}</td>
+          <td>${c.orders}</td>
+          <td>${c.quantity}</td>
+          <td>${c.phone}</td>
+          <td>${c.address}</td>
+          <td><button onclick="remove('${c.id}')">Delete</button></td>
+        </tr>`;
     });
+  }
 
+  window.remove = async (id) => {
+    await deleteCustomer(id);
     renderTable();
-  </script>
+  };
 
-</body>
-</html>
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const customer = {
+      name: name.value,
+      phone: phone.value,
+      type: type.value,
+      orders: orders.value,
+      quantity: quantity.value,
+      address: address.value
+    };
+    await saveCustomer(customer);
+    form.reset();
+    renderTable();
+  });
+
+  renderTable();
+</script>
+
+ 
+
